@@ -1,0 +1,7 @@
+name = "edge-tts-worker"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# إذا كنت تريد استخدام API_KEY، أزل التعليق عن السطر التالي
+# [vars]
+# API_KEY = "cfat_EmM0ctywK5bsxwVMo5J2laWeWxReJIDreg5EA64de42f3d39"

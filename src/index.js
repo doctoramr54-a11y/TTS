@@ -1,5 +1,5 @@
 // ============================================================
-// Edge TTS Cloudflare Worker - نسخة معدلة لدعم الأصوات العربية
+// Edge TTS Cloudflare Worker - نسخة معدلة لدعم الأصوات متعددة اللغات
 // ============================================================
 
 const encoder = new TextEncoder();
@@ -17,8 +17,11 @@ let tokenInfo = {
     expiredAt: null
 };
 
-// خريطة تحويل أسماء الأصوات المتوافقة مع OpenAI إلى أصوات Edge TTS
+// ============================================================
+// خريطة تحويل أسماء الأصوات
+// ============================================================
 const VOICE_MAPPING = {
+    // أصوات OpenAI (تقليدية)
     'alloy':   'zh-CN-XiaoxiaoNeural',
     'echo':    'zh-CN-YunxiNeural',
     'fable':   'zh-CN-XiaoyiNeural',
@@ -26,11 +29,17 @@ const VOICE_MAPPING = {
     'nova':    'zh-CN-XiaohanNeural',
     'shimmer': 'zh-CN-XiaomengNeural',
 
-    // اختصارات عربية (يمكنك استخدامها مباشرة)
-    'salma':   'ar-EG-SalmaNeural',
-    'zariyah': 'ar-SA-ZariyahNeural',
-    'hamed':   'ar-SA-HamedNeural',
-    'amina':   'ar-EG-AminaNeural'
+    // أصوات عربية خالصة
+    'salma':   'ar-EG-SalmaNeural',      // أنثى - مصر
+    'zariyah': 'ar-SA-ZariyahNeural',    // أنثى - السعودية
+    'hamed':   'ar-SA-HamedNeural',      // ذكر - السعودية
+    'amina':   'ar-EG-AminaNeural',      // أنثى - مصر
+
+    // ⭐ أصوات متعددة اللغات (Multilingual) - الأفضل للنصوص المختلطة
+    'ava':     'en-US-AvaMultilingualNeural',      // أنثى متعددة اللغات
+    'andrew':  'en-US-AndrewMultilingualNeural',   // ذكر متعدد اللغات
+    'emma':    'en-US-EmmaMultilingualNeural',     // أنثى متعددة اللغات
+    'brian':   'en-US-BrianMultilingualNeural'     // ذكر متعدد اللغات
 };
 
 // ============================================================
@@ -81,7 +90,7 @@ async function handleRequest(request) {
             let {
                 model = "tts-1",
                 input,
-                voice = "ar-EG-SalmaNeural",   // ← الصوت الافتراضي الآن عربي
+                voice = "en-US-AvaMultilingualNeural",   // ← الصوت الافتراضي الآن متعدد اللغات
                 response_format = "mp3",
                 speed = 1.0,
                 pitch = 1.0,
@@ -144,12 +153,13 @@ async function handleRequest(request) {
         }
     }
 
-    // مسار بسيط لفحص الحالة
+    // مسار فحص الحالة
     if (path === "/" || path === "/health") {
         return new Response(JSON.stringify({
             status: "ok",
             service: "edge-tts-worker",
-            default_voice: "ar-EG-SalmaNeural"
+            default_voice: "en-US-AvaMultilingualNeural",
+            available_voices: Object.keys(VOICE_MAPPING)
         }), {
             status: 200,
             headers: {
@@ -191,7 +201,7 @@ function makeCORSHeaders() {
 // ============================================================
 async function getVoice(
     text,
-    voiceName = "ar-EG-SalmaNeural",
+    voiceName = "en-US-AvaMultilingualNeural",
     rate = 0,
     pitch = 0,
     style = "general",
@@ -272,7 +282,7 @@ async function getAudioChunk(text, voiceName, rate, pitch, style, outputFormat) 
 }
 
 // ============================================================
-// بناء SSML - النسخة المعدلة لدعم العربية
+// بناء SSML
 // ============================================================
 function getSsml(text, voiceName, rate, pitch, style) {
     // استخراج اللغة من اسم الصوت (ar-EG-SalmaNeural ➡️ ar-EG)
@@ -449,4 +459,4 @@ async function fetchWithTimeout(url, options, timeout = 30000) {
         clearTimeout(id);
         throw error;
     }
-  }
+    }
